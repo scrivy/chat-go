@@ -1,0 +1,28 @@
+<div class='messages' autoscrolldown>
+	<div ng-repeat='message in model.friend.messages'>
+		<b>{{message.from}}</b>:
+		{{message.message}}
+		<div
+			ng-hide='message.delivered || message.from != "me"'
+			class='ui mini active inline loader'
+			style='float: right; margin: 0 1em;'>
+		</div>
+		<div
+			ng-show='message.delivered && message.from == "me"'
+			class='ui mini text'
+			style='float: right; margin: 0 1em; color: gray;'>
+				Delivered
+		</div>
+
+	</div>
+</div>
+<br />
+<div class='inputsend'>
+	<div class='ui action input'>
+		<input
+			ng-model='model.inputMessage'
+			ng-keypress='sendhandler($event)'
+			placeholder='message...' />
+		<div class='ui button' ng-click='sendhandler($event)'>send</div>
+	</div>
+</div>

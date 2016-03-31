@@ -1,0 +1,12 @@
+{
+  "strict": true,
+  "globalstrict": true,
+  "globals": {
+    "angular": false,
+    "localStorage": false,
+    "CryptoJS": false,
+    "WebSocket": false,
+    "window": false,
+    "sjcl": false
+  }
+}

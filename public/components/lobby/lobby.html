@@ -1,0 +1,43 @@
+<div class='messages' autoscrolldown>
+    <p ng-repeat='message in appState.lobby.messages'>
+        <b>{{message.username}}</b>:
+        {{message.message}}
+    </p>
+</div>
+<br />
+<div class='inputsend'>
+    <div class='ui action input'>
+        <input
+            ng-model='model.inputmessage'
+            ng-keypress='sendhandler($event)'
+            placeholder='message...' />
+        <div class='ui button' ng-click='sendhandler($event)'>send</div>
+    </div>
+</div>
+
+<div class='modalcontainer' ng-show='model.setupvisible'>
+    <div class='setup'>
+        <div class='ui header'>
+            Lobby Session Setup
+        </div>
+        <div class='content'>
+            <div class='ui large input fluid'>
+                <input
+                    ng-model='model.username'
+                    ng-keypress='sessionsetuphandler($event)'
+                    type='text'
+                    placeholder='Alias' />
+                <br />
+            </div>
+            <br />
+            <div class='actions'>
+                <div
+                    ng-click='sessionsetuphandler($event)'
+                    style='margin-left: 0;'
+                    class='ui positive button huge fluid'>
+                        Connect
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

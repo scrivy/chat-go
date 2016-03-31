@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang='en' ng-app='chat' ng-controller='htmlCtrl'>
+  <head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width'>
+    <title>{{model.title}}</title>
+    <link rel='stylesheet' href='bower_components/semantic-ui/dist/semantic.min.css'>
+    <link rel='stylesheet' href='app.css'>
+  </head>
+<body>
+<!-- begin navibar -->
+<div class='ui tiered transparent inverted menu' ng-controller='topnavibar' ng-class="{green: model.newPmMessage}">
+    <div class='menu'>
+        <a  ng-class='{active: appState.state.current.name=="lobby"}'
+            ui-sref='lobby'
+            class='item mainview'>
+                <i class='chat icon'></i>
+                Lobby
+        </a>
+        <a  ng-class='{active: appState.state.current.name=="friends"}'
+            ui-sref='friends'
+            class='item mainview'>
+                <i class='users icon'></i>
+                Friends
+        </a>
+        <span 
+            ng-show='appState.state.current.name=="pm"'
+            class='item mainview active'>
+                <i class='mail icon'></i>
+                PM
+        </span>
+            
+    </div>
+    <div ng-show='appState.state.current.name == "lobby"' class='ui sub menu'>
+        <a class='item'>
+            {{model.clientcount}}
+            People Connected
+        </a>
+        <div class='right menu'>
+            <a ng-click='togglelobbysettings()' class='item'>
+                <i class='setting icon'></i>
+            </a>
+        </div>
+    </div>
+
+    <div ng-show='appState.state.current.name == "friends"' class='ui sub menu'>
+        <a class='item' ng-click="toggle('addFriendVisible')">
+            <i class='icon small add'></i>
+            Add
+        </a>
+        <a  class='item'
+            ng-class='{active: appState.friends.deleteFriendsVisible}'
+            ng-click='toggleDeleteFriends()'>
+                <i class='icon small remove'></i>
+                Remove
+        </a>
+    </div>
+
+    <div ng-show='appState.state.current.name == "pm"' class='ui sub menu'>
+        <span class='item'>
+            <b>{{appState.friends.friends[appState.state.params.friendId].name}}</b>
+        </span>
+    </div>
+</div>
+<!-- end navibar -->
+
+<div ui-view class='viewcontainer'></div>
+
+<!-- bower scripts -->
+  <script src='bower_components/jquery/dist/jquery.min.js'></script>
+  <script src='bower_components/semantic-ui/dist/semantic.min.js'></script>
+  <script src='bower_components/angular/angular.js'></script>
+  <script src='bower_components/angular-animate/angular-animate.js'></script>
+  <script src='bower_components/angular-ui-router/release/angular-ui-router.js'></script>
+
+  <script src='crypto/sjcl.js'></script>
+  <script src='crypto/aes.js'></script>
+  <script src='crypto/md5.js'></script>
+  <script src='crypto/sha3.js'></script>
+
+<!-- scripts -->
+  <script src='app.js'></script>
+  <script src='components/pm/pm.js'></script>
+  <script src='components/lobby/lobby.js'></script>
+  <script src='components/friends/friends.js'></script>
+</body>
+</html>
+

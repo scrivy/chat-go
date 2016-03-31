@@ -1,0 +1,65 @@
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.messages {
+  overflow-y: scroll;
+  overflow-x: hidden;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  bottom: 60px;
+  left: 5px;
+}
+
+.messages > div {
+  margin: 0.5em 0;
+}
+
+.inputsend {
+  position: absolute;
+  bottom: 10px;
+}
+
+.viewcontainer {
+  padding: 8px;
+  position: absolute;
+  top: 67px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.modalcontainer {
+  position: absolute;
+  z-index: 1000;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.8);
+}
+
+.modalcontainer.ng-hide-add,
+.modalcontainer.ng-hide-remove {
+  transition: 0.3s linear all;
+}
+
+.modalcontainer.ng-hide-add { opacity: 1; }
+.modalcontainer.ng-hide-add.ng-hide-add-active { opacity: 0; }
+.modalcontainer.ng-hide-remove { opacity: 0; }
+.modalcontainer.ng-hide-remove.ng-hide-remove-active { opacity: 1; }
+
+.setup {
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+  background-color: #FFF;
+  padding: 1em;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+
+

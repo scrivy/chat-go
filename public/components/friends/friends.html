@@ -1,0 +1,68 @@
+<div class='ui divided very relaxed list'>
+    <div ng-repeat='(friendId, data) in appState.friends.friends' class='item'>
+        <a ui-sref="pm({ friendId: friendId })">
+            {{data.name}}
+        </a>
+        <a  ng-click='deleteFriend(friendId)'
+            ng-show='appState.friends.deleteFriendsVisible'>
+            <i class='delete icon'></i>
+        </a>
+    </div>
+</div>
+
+<div class='modalcontainer' ng-show='appState.friends.addFriendVisible'>
+    <div class='setup'>
+        <div class='ui header'>
+            Add Friend
+        </div>
+        <div class='content'>
+            request id: {{model.addFriend.requestId}}
+            <br /><br />
+            <div ng-show='model.addFriend.inputAndButtonVisible'>
+                <div class='ui large input fluid'>
+                    <input
+                        ng-model='model.addFriend.friendsId'
+                        type='text'
+                        placeholder="friend's request id" />
+                </div>
+                <br />
+                <div class='ui large input fluid'>
+                    <input
+                        ng-model='model.addFriend.friendsName'
+                        type='text'
+                        placeholder="friend's name">
+                </div>
+                <br />
+                <div class='actions' >
+                    <div
+                        ng-click='sendRequest()'
+                        style='margin-left: 0;'
+                        class='ui positive button huge fluid'>
+                            Add
+                    </div>
+                </div>
+            </div>
+            <div ng-show='model.addFriend.passwordVisible'>
+                give to friend: {{model.addFriend.password}}
+            </div>
+
+            <div ng-show='model.addFriend.passInputVisible'>
+                <div class='ui large input fluid'>
+                    <input
+                        ng-model='model.addFriend.password'
+                        type='text'
+                        placeholder='password' />
+                </div>
+                <br />
+                <div class='actions' >
+                    <div
+                        ng-click='testMessage()'
+                        style='margin-left: 0;'
+                        class='ui positive button huge fluid'>
+                            Test Connection
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
