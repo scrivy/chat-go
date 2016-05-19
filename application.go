@@ -3,43 +3,41 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
-	"github.com/gorilla/websocket"
+	"golang.org/x/net/websocket"
 )
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+func main() {
+	http.Handle("/ws", websocket.Handler(wsHandler))
+
+	err := http.ListenAndServe(":5000", nil)
+	if err != nil {
+		log.Fatal("ListenAndServe: ", err)
+	}
 }
 
-func main() {
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		conn, err := upgrader.Upgrade(w, r, nil)
+func wsHandler(ws *websocket.Conn) {
+	log.Printf("%+v\n", ws)
+
+	var m message
+	var err error
+	for {
+		err = websocket.JSON.Receive(ws, &m)
 		if err != nil {
 			log.Println(err)
-			return
+			break
 		}
-		for {
-			msgType, msg, err := conn.ReadMessage()
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			if string(msg) == "ping" {
-				log.Println("ping")
-				time.Sleep(2 * time.Second)
-				err = conn.WriteMessage(msgType, []byte("pong"))
-				if err != nil {
-					log.Println(err)
-					return
-				}
-			} else {
-				conn.Close()
-				log.Println(string(msg))
-				return
-			}
+
+		log.Println("Received message:", m.Action)
+		log.Printf("%+v\n", m.Data)
+
+		switch m.Action {
+		case "message":
+
+		default:
+			log.Printf("%+v\n", m.Data)
 		}
-	})
-	http.ListenAndServe(":3000", nil)
+	}
+
+	log.Println("Disconnected")
 }
