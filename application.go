@@ -30,6 +30,7 @@ func wsHandler(ws *websocket.Conn) {
 	idToConnMapMutex.Lock()
 	idToConnMap[id] = &c
 	idToConnMapMutex.Unlock()
+	sendToAllConns(getClientCountMessage())
 	log.Printf("%+v\n", idToConnMap)
 
 	var m message
@@ -46,23 +47,13 @@ func wsHandler(ws *websocket.Conn) {
 
 		switch m.Action {
 		case "lobbymessage":
-			var clients []*websocket.Conn
-
-			idToConnMapMutex.RLock()
-			for _, c := range idToConnMap {
-				clients = append(clients, c.conn)
-			}
-			idToConnMapMutex.RUnlock()
-
 			jsonData, err := json.Marshal(m)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			for i, c := range clients {
-				c.Write(jsonData)
-				log.Printf("sent to client: %d\n", i)
-			}
+			sendToAllConns(&jsonData)
+
 			/*		case "updateLocation":
 					data := m.Data.(map[string]interface{})
 					l := location{
@@ -83,6 +74,7 @@ func wsHandler(ws *websocket.Conn) {
 	idToConnMapMutex.Lock()
 	delete(idToConnMap, id)
 	idToConnMapMutex.Unlock()
+	sendToAllConns(getClientCountMessage())
 }
 
 var getIdChan chan string
@@ -107,6 +99,32 @@ func connIdGen() {
 		id = hex.EncodeToString(md5Sum[:])
 		getIdChan <- id
 		count++
+	}
+}
+
+func getClientCountMessage() *[]byte {
+	m := message{
+		Action: "clientcount",
+	}
+	idToConnMapMutex.RLock()
+	m.Data = len(idToConnMap)
+	idToConnMapMutex.RUnlock()
+
+	jsonData, _ := json.Marshal(m)
+	return &jsonData
+}
+
+func sendToAllConns(data *[]byte) {
+	var clients []*websocket.Conn
+	idToConnMapMutex.RLock()
+	for _, c := range idToConnMap {
+		clients = append(clients, c.conn)
+	}
+	idToConnMapMutex.RUnlock()
+
+	for i, c := range clients {
+		c.Write(*data)
+		log.Printf("sent to client: %d\n", i)
 	}
 }
 
