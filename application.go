@@ -17,7 +17,7 @@ func main() {
 	go connIdGen()
 	http.Handle("/ws", websocket.Handler(wsHandler))
 	http.Handle("/", http.FileServer(http.Dir("public")))
-	log.Fatal(http.ListenAndServe(":5000", nil))
+	log.Fatal(http.ListenAndServe(":5001", nil))
 }
 
 func wsHandler(ws *websocket.Conn) {
