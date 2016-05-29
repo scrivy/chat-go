@@ -100,7 +100,7 @@ angular.module('chat', [
 .factory('ws', ['$rootScope', 'appState', 'popSound', 'page',
     function($rootScope, appState, popSound, page) {
 
-        var ws = new WebSocket('ws://' + window.location.hostname + ':8080'),
+        var ws = new WebSocket('ws://' + window.location.host + '/ws'),
             actions = {
 
                 lobbymessage: function(message) {
