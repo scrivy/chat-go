@@ -12,8 +12,21 @@ import (
 	"golang.org/x/net/websocket"
 )
 
+var getIdChan chan string
+var idToConn map[string]*client = make(map[string]*client)
+var idToConnMapMutex sync.RWMutex
+var friendRequests map[float64]string = make(map[float64]string)
+
+type message struct {
+	Action string      `json:"action"`
+	Data   interface{} `json:"data"`
+}
+
+type client struct {
+	conn *websocket.Conn
+}
+
 func main() {
-	idToConnMap = make(map[string]*client)
 	go connIdGen()
 	http.Handle("/ws", websocket.Handler(wsHandler))
 	http.Handle("/", http.FileServer(http.Dir("public")))
@@ -28,10 +41,10 @@ func wsHandler(ws *websocket.Conn) {
 		conn: ws,
 	}
 	idToConnMapMutex.Lock()
-	idToConnMap[id] = &c
+	idToConn[id] = &c
 	idToConnMapMutex.Unlock()
 	sendToAllConns(getClientCountMessage())
-	log.Printf("%+v\n", idToConnMap)
+	log.Printf("%+v\n", idToConn)
 
 	var m message
 	var err error
@@ -53,7 +66,24 @@ func wsHandler(ws *websocket.Conn) {
 				return
 			}
 			sendToAllConns(&jsonData)
-
+		case "addFriend":
+			data, ok := m.Data.(map[string]interface{})
+			if ok {
+				from, ok := data["from"].(float64)
+				to, ok2 := data["to"].(float64)
+				if !ok || !ok2 {
+					continue
+				}
+				_, exists := friendRequests[to]
+				msg := message{
+					Action: "addFriend",
+					Data:   map[string]bool{"exists": exists},
+				}
+				websocket.JSON.Send(ws, msg)
+				friendRequests[from] = id
+			} else {
+				log.Println("type assertion failed")
+			}
 			/*		case "updateLocation":
 					data := m.Data.(map[string]interface{})
 					l := location{
@@ -66,28 +96,15 @@ func wsHandler(ws *websocket.Conn) {
 					c.location = l
 					sendAllLocations(nil) */
 		default:
-			log.Printf("%+v\n", m.Data)
+			log.Println("did not match an action")
 		}
 	}
 
 	log.Println("Disconnected")
 	idToConnMapMutex.Lock()
-	delete(idToConnMap, id)
+	delete(idToConn, id)
 	idToConnMapMutex.Unlock()
 	sendToAllConns(getClientCountMessage())
-}
-
-var getIdChan chan string
-var idToConnMap map[string]*client
-var idToConnMapMutex sync.RWMutex
-
-type message struct {
-	Action string      `json:"action"`
-	Data   interface{} `json:"data"`
-}
-
-type client struct {
-	conn *websocket.Conn
 }
 
 func connIdGen() {
@@ -107,7 +124,7 @@ func getClientCountMessage() *[]byte {
 		Action: "clientcount",
 	}
 	idToConnMapMutex.RLock()
-	m.Data = len(idToConnMap)
+	m.Data = len(idToConn)
 	idToConnMapMutex.RUnlock()
 
 	jsonData, _ := json.Marshal(m)
@@ -117,7 +134,7 @@ func getClientCountMessage() *[]byte {
 func sendToAllConns(data *[]byte) {
 	var clients []*websocket.Conn
 	idToConnMapMutex.RLock()
-	for _, c := range idToConnMap {
+	for _, c := range idToConn {
 		clients = append(clients, c.conn)
 	}
 	idToConnMapMutex.RUnlock()
@@ -136,7 +153,7 @@ func sendAllLocations(except *string) {
 	var clients []*websocket.Conn
 
 	idToConnMapMutex.RLock()
-	for _, c := range idToConnMap {
+	for _, c := range idToConn {
 		clients = append(clients, c.conn)
 		if c.location.Latlng != nil {
 			locations = append(locations, c.location)

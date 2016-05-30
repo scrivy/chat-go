@@ -18,8 +18,7 @@ angular.module('chat').config(['$stateProvider', function($stateProvider) {
                         action: 'addFriend',
                         data: {
                             from: $scope.model.addFriend.requestId,
-                            to: $scope.model.addFriend.friendsId
-//                            to: $scope.model.addFriend.friendsId
+                            to: +$scope.model.addFriend.friendsId
                         }
                     });
                 }
