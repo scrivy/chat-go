@@ -28,7 +28,7 @@ angular.module('chat').config(['$stateProvider', function($stateProvider) {
                 ws.send({
                     action: 'testMessage',
                     data: {
-                        to: $scope.model.addFriend.friendsId,
+                        to: +$scope.model.addFriend.friendsId,
                         message: sjcl.encrypt(
                             $scope.model.addFriend.password,
                             JSON.stringify({

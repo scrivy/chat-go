@@ -54,21 +54,20 @@ func wsHandler(ws *websocket.Conn) {
 			log.Println(err)
 			break
 		}
-
-		log.Println("Received message:", m.Action)
-		log.Printf("%+v\n", m.Data)
-
-		switch m.Action {
-		case "lobbymessage":
-			jsonData, err := json.Marshal(m)
-			if err != nil {
-				log.Println(err)
-				return
-			}
-			sendToAllConns(&jsonData)
-		case "addFriend":
-			data, ok := m.Data.(map[string]interface{})
-			if ok {
+		log.Printf("%+v\n", m)
+		data, ok := m.Data.(map[string]interface{})
+		if !ok {
+			log.Println("type assertion failed")
+		} else {
+			switch m.Action {
+			case "lobbymessage":
+				jsonData, err := json.Marshal(m)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				sendToAllConns(&jsonData)
+			case "addFriend":
 				from, ok := data["from"].(float64)
 				to, ok2 := data["to"].(float64)
 				if !ok || !ok2 {
@@ -81,9 +80,19 @@ func wsHandler(ws *websocket.Conn) {
 				}
 				websocket.JSON.Send(ws, msg)
 				friendRequests[from] = id
-			} else {
-				log.Println("type assertion failed")
-			}
+			case "testMessage":
+				if toNum, ok := data["to"].(float64); ok {
+					if toId, ok := friendRequests[toNum]; ok {
+						if to, ok := idToConn[toId]; ok {
+							websocket.JSON.Send(to.conn, m)
+							delete(friendRequests, toNum)
+						}
+					}
+				} else {
+					log.Println("toNum not ok")
+				}
+
+			//	to, exists := friendRequests[]
 			/*		case "updateLocation":
 					data := m.Data.(map[string]interface{})
 					l := location{
@@ -95,8 +104,9 @@ func wsHandler(ws *websocket.Conn) {
 					}
 					c.location = l
 					sendAllLocations(nil) */
-		default:
-			log.Println("did not match an action")
+			default:
+				log.Println("did not match an action")
+			}
 		}
 	}
 
