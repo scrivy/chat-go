@@ -35,8 +35,6 @@ func main() {
 }
 
 func wsHandler(ws *websocket.Conn) {
-	log.Printf("%+v\n", ws)
-
 	id := <-getIdChan
 	c := client{
 		conn: ws,
@@ -45,7 +43,6 @@ func wsHandler(ws *websocket.Conn) {
 	idToConn[id] = &c
 	idToConnMapMutex.Unlock()
 	sendToAllConns(getClientCountMessage())
-	log.Printf("%+v\n", idToConn)
 
 	var m message
 	var err error
