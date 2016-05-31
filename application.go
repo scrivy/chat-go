@@ -96,11 +96,18 @@ func wsHandler(ws *websocket.Conn) {
 					log.Println("toNum not ok")
 				}
 			}
-		case "registerId":
-			if id, ok := m.Data.(string); ok {
+		case "registerIds":
+			if ids, ok := m.Data.([]interface{}); ok {
 				idToConnMapMutex.Lock()
-				idToConn[id] = &c
+				for _, id := range ids {
+					if id, ok := id.(string); ok {
+						idToConn[id] = &c
+					}
+				}
 				idToConnMapMutex.Unlock()
+			} else {
+				log.Println("registerIds: assertion failed")
+				log.Println(reflect.TypeOf(m.Data))
 			}
 		case "privateMessage", "privateMessageDelivered":
 			if data, ok := m.Data.(map[string]interface{}); ok {
