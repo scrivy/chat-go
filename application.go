@@ -55,7 +55,7 @@ func wsHandler(ws *websocket.Conn) {
 			log.Println(err)
 			break
 		}
-		log.Printf("%+v\n", m)
+		log.Println(m.Action)
 
 		switch m.Action {
 		case "lobbymessage":
@@ -110,19 +110,6 @@ func wsHandler(ws *websocket.Conn) {
 					}
 				}
 			}
-
-		//	to, exists := friendRequests[]
-		/*		case "updateLocation":
-				data := m.Data.(map[string]interface{})
-				l := location{
-					Id:       id,
-					Accuracy: data["accuracy"].(float64),
-				}
-				for _, num := range data["latlng"].([]interface{}) {
-					l.Latlng = append(l.Latlng, num.(float64))
-				}
-				c.location = l
-				sendAllLocations(nil) */
 		default:
 			log.Println("did not match an action")
 		}
