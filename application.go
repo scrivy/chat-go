@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"reflect"
 	"strconv"
 	"sync"
 
@@ -55,19 +56,17 @@ func wsHandler(ws *websocket.Conn) {
 			break
 		}
 		log.Printf("%+v\n", m)
-		data, ok := m.Data.(map[string]interface{})
-		if !ok {
-			log.Println("type assertion failed")
-		} else {
-			switch m.Action {
-			case "lobbymessage":
-				jsonData, err := json.Marshal(m)
-				if err != nil {
-					log.Println(err)
-					continue
-				}
-				sendToAllConns(&jsonData)
-			case "addFriend":
+
+		switch m.Action {
+		case "lobbymessage":
+			jsonData, err := json.Marshal(m)
+			if err != nil {
+				log.Println(err)
+				continue
+			}
+			sendToAllConns(&jsonData)
+		case "addFriend":
+			if data, ok := m.Data.(map[string]interface{}); ok {
 				from, ok := data["from"].(float64)
 				to, ok2 := data["to"].(float64)
 				if !ok || !ok2 {
@@ -80,7 +79,12 @@ func wsHandler(ws *websocket.Conn) {
 				}
 				websocket.JSON.Send(ws, msg)
 				friendRequests[from] = id
-			case "testMessage":
+			} else {
+				log.Println("addFriend: assertion failed")
+				log.Println(reflect.TypeOf(m.Data))
+			}
+		case "testMessage":
+			if data, ok := m.Data.(map[string]interface{}); ok {
 				if toNum, ok := data["to"].(float64); ok {
 					if toId, ok := friendRequests[toNum]; ok {
 						if to, ok := idToConn[toId]; ok {
@@ -91,22 +95,36 @@ func wsHandler(ws *websocket.Conn) {
 				} else {
 					log.Println("toNum not ok")
 				}
-
-			//	to, exists := friendRequests[]
-			/*		case "updateLocation":
-					data := m.Data.(map[string]interface{})
-					l := location{
-						Id:       id,
-						Accuracy: data["accuracy"].(float64),
-					}
-					for _, num := range data["latlng"].([]interface{}) {
-						l.Latlng = append(l.Latlng, num.(float64))
-					}
-					c.location = l
-					sendAllLocations(nil) */
-			default:
-				log.Println("did not match an action")
 			}
+		case "registerId":
+			if id, ok := m.Data.(string); ok {
+				idToConnMapMutex.Lock()
+				idToConn[id] = &c
+				idToConnMapMutex.Unlock()
+			}
+		case "privateMessage", "privateMessageDelivered":
+			if data, ok := m.Data.(map[string]interface{}); ok {
+				if to, ok := data["to"].(string); ok {
+					if toConn, ok := idToConn[to]; ok {
+						websocket.JSON.Send(toConn.conn, m)
+					}
+				}
+			}
+
+		//	to, exists := friendRequests[]
+		/*		case "updateLocation":
+				data := m.Data.(map[string]interface{})
+				l := location{
+					Id:       id,
+					Accuracy: data["accuracy"].(float64),
+				}
+				for _, num := range data["latlng"].([]interface{}) {
+					l.Latlng = append(l.Latlng, num.(float64))
+				}
+				c.location = l
+				sendAllLocations(nil) */
+		default:
+			log.Println("did not match an action")
 		}
 	}
 

@@ -69,8 +69,8 @@ angular.module('chat').config(['$stateProvider', function($stateProvider) {
                     saveFriends();
                     $scope.testMessage();
                     ws.send({
-                        action: 'registerIds',
-                        data: [$scope.model.addFriend.myId]
+                        action: 'registerId',
+                        data: $scope.model.addFriend.myId
                     });
                     resetAddFriend();
                 }
