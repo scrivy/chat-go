@@ -163,37 +163,3 @@ func sendToAllConns(data *[]byte) {
 		log.Printf("sent to client: %d\n", i)
 	}
 }
-
-/*
-func sendAllLocations(except *string) {
-	log.Println("sending all locations")
-
-	locations := make([]location, 0)
-	var clients []*websocket.Conn
-
-	idToConnMapMutex.RLock()
-	for _, c := range idToConn {
-		clients = append(clients, c.conn)
-		if c.location.Latlng != nil {
-			locations = append(locations, c.location)
-		}
-	}
-	idToConnMapMutex.RUnlock()
-
-	m := message{
-		Action: "allLocations",
-		Data:   &locations,
-	}
-
-	jsonData, err := json.Marshal(m)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	for i, c := range clients {
-		c.Write(jsonData)
-		log.Printf("sent to client: %d\n", i)
-	}
-}
-*/
